@@ -1,0 +1,25 @@
+name: Build Full Project
+on: [push]
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install PyInstaller
+        run: pip install pyinstaller pywebview
+      - name: Compile EXE
+        run: |
+          # Этот скрипт правильно находит пути к папкам внутри EXE
+          echo "import webview; import os; import sys; def resource_path(relative_path): base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__))); return os.path.join(base_path, relative_path); html_path = resource_path('index.html'); webview.create_window('REDLINE ARCHITECT', html_path); webview.start()" > main.py
+          
+          # Флаг --add-data ".;." копирует ВСЕ твои папки и файлы внутрь EXE
+          pyinstaller --noconsole --onefile --icon=REDLINE.ico --add-data ".;." main.py
+      - name: Upload Result
+        uses: actions/upload-artifact@v4
+        with:
+          name: Redline-Full-Package
+          path: dist/*.exe
