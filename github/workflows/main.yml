@@ -1,25 +1,59 @@
-name: Build Full Project
+name: Build React EXE
 on: [push]
 jobs:
   build:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+
+      # 1. Установка Node.js для сборки React (Vite)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install JS Dependencies
+        run: npm install
+
+      - name: Build React Project
+        run: npm run build # Это создаст папку 'dist' с рабочим сайтом
+
+      # 2. Установка Python для создания EXE
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
+
       - name: Install PyInstaller
         run: pip install pyinstaller pywebview
+
+      - name: Create Entry Script
+        shell: pwsh
+        run: |
+          $code = @"
+          import webview
+          import os
+          import sys
+
+          def resource_path(relative_path):
+              if hasattr(sys, '_MEIPASS'):
+                  return os.path.join(sys._MEIPASS, relative_path)
+              return os.path.join(os.path.abspath("."), relative_path)
+
+          # Указываем путь к собранному index.html внутри папки dist
+          html_path = resource_path('dist/index.html')
+          webview.create_window('REDLINE ARCHITECT', html_path)
+          webview.start()
+          "@
+          $code | Out-File -FilePath main.py -Encoding utf8
+
       - name: Compile EXE
         run: |
-          # Этот скрипт правильно находит пути к папкам внутри EXE
-          echo "import webview; import os; import sys; def resource_path(relative_path): base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__))); return os.path.join(base_path, relative_path); html_path = resource_path('index.html'); webview.create_window('REDLINE ARCHITECT', html_path); webview.start()" > main.py
-          
-          # Флаг --add-data ".;." копирует ВСЕ твои папки и файлы внутрь EXE
-          pyinstaller --noconsole --onefile --icon=REDLINE.ico --add-data ".;." main.py
+          # Добавляем всю папку 'dist' внутрь EXE
+          pyinstaller --noconsole --onefile --icon=REDLINE.ico --add-data "dist;dist" main.py
+
       - name: Upload Result
         uses: actions/upload-artifact@v4
         with:
-          name: Redline-Full-Package
+          name: Redline-Final-EXE
           path: dist/*.exe
