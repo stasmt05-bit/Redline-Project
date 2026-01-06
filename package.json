@@ -1,0 +1,27 @@
+
+{
+  "name": "redline-architect",
+  "version": "2.1.0",
+  "main": "main.js",
+  "build": {
+    "appId": "com.redline.architect",
+    "productName": "Redline Architect",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "portable",
+      "icon": "assets/icon.ico"
+    },
+    "portable": {
+      "oneClick": true,
+      "allowToChangeInstallationDirectory": false,
+      "artifactName": "Redline_Architect_v${version}.exe"
+    }
+  },
+  "dependencies": {
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "recharts": "^3.6.0"
+  }
+}

@@ -1,0 +1,8 @@
+
+{
+  "name": "Redline System Architect",
+  "description": "High-performance Redline Edition dashboard for kernel-level security research and memory manipulation.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
